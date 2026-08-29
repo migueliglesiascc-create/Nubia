@@ -99,6 +99,9 @@
 
     <section id="join" class="center hidden">
       <div class="eyebrow student-kicker"><i></i>Una pregunta. Una palabra. Toda la clase.</div>
+      <div id="loadingCard" class="card student hidden" role="status" aria-live="polite">
+        <span class="step">JOINING THE SESSION</span><h1>Opening session…</h1><p>One moment, please.</p>
+      </div>
       <form id="codeCard" class="card student" onsubmit="joinSession(event)">
         <span class="step">PARA PARTICIPAR</span><h1>Introduce el código</h1>
         <p>Lo encontrarás en la pantalla del aula.</p>
@@ -221,7 +224,7 @@
       document.documentElement.lang=state.lang;localStorage.setItem('nubia-language-v2',state.lang);state.studentUrl=WEB_APP_URL+'?student=1&lang='+state.lang;$('langBtn').textContent=state.lang==='es'?'EN':'ES';$('langBtn').setAttribute('aria-label',t('switchLanguage'));$('themeBtn').setAttribute('aria-label',state.lang==='es'?'Cambiar tema':'Change theme');$('qr').alt=$('projectQr').alt=state.lang==='es'?'Código QR para participar':'QR code to participate';$('qrZoomImage').alt=state.lang==='es'?'Código QR ampliado para participar':'Enlarged QR code to participate';
       setText('#homeBtn',t('home'));document.querySelectorAll('.eyebrow').forEach(node=>node.lastChild.textContent=t('tagline'));setText('#home h1',t('hero'));setHtml('#home .lead',t('lead'));setText('label[for="question"]',t('yourQuestion'));
       const question=$('question');if(!previous||question.value===D[previous].sampleQuestion)question.value=t('sampleQuestion');setText('#home .meta span:first-child',t('oneWord'));setHtml('#createBtn',t('create')+' <span>→</span>');
-      setText('#codeCard .step',t('joining'));setText('#codeCard h1',t('enterCode'));setText('#codeCard p',t('classScreen'));setHtml('#joinBtn',t('enter')+' <span>→</span>');setText('#identityCard .step',t('credit'));setText('#identityCard h1',t('who'));setText('#identityCard .credit-notice',t('realNameNotice'));setText('label[for="studentName"]',t('fullName'));$('studentName').placeholder=t('fullName');setHtml('#identityBtn',t('continue')+' <span>→</span>');
+      setText('#loadingCard .step',state.lang==='es'?'ENTRANDO EN LA SESIÓN':'JOINING THE SESSION');setText('#loadingCard h1',state.lang==='es'?'Abriendo la sesión…':'Opening session…');setText('#loadingCard p',state.lang==='es'?'Un momento, por favor.':'One moment, please.');setText('#codeCard .step',t('joining'));setText('#codeCard h1',t('enterCode'));setText('#codeCard p',t('classScreen'));setHtml('#joinBtn',t('enter')+' <span>→</span>');setText('#identityCard .step',t('credit'));setText('#identityCard h1',t('who'));setText('#identityCard .credit-notice',t('realNameNotice'));setText('label[for="studentName"]',t('fullName'));$('studentName').placeholder=t('fullName');setHtml('#identityBtn',t('continue')+' <span>→</span>');
       const nameNode=$('currentStudentName'),identityLine=document.querySelector('#answerCard .identity-line>span');identityLine.textContent=t('as')+' ';identityLine.appendChild(nameNode);setText('#answerCard .identity-line button',t('fixName'));setText('label[for="answer"]',t('answerOne'));$('answer').placeholder=t('writeHere');setText('#answerCard .meta span:first-child',t('max32'));setText('#successCard .step',t('sent'));setText('#successCard h1',t('counts'));setHtml('#successCard>p',t('registered')+' <span id="successName" class="student-name"></span>. '+t('watch'));if(state.participantName)$('successName').textContent=state.participantName;setText('#successCard .secondary',t('another'));
       setText('#host .step',t('liveQuestion'));setText('#statusText',state.session&&state.session.activa?t('open'):t('closed'));setText('.participation-button',t('participation'));setText('#host .controls .primary',t('project'));setText('.share>.step',t('joinSession'));setText('.share .or',t('scanOrCode'));setText('.share .link-note',t('studentApp'));setText('.share-actions button:first-child',t('copyDirect'));setText('.share-actions button:last-child',t('copyStudent'));setText('#studentAccessLink',t('openStudent'));setText('#cloud .empty',t('firstWords'));setCountLabel('responseCount',t('responses'));setCountLabel('uniqueCount',t('unique'));
       setText('#participation .step',t('teacherUse'));setText('#participation h1',t('participation'));setText('#participation .report-button',t('printReport'));setText('#participation .participation-actions button:last-child',t('backSession'));setText('.participation-summary',t('participationSummary'));setCountLabel('participantCount',t('students'));setCountLabel('creditedCount',t('withCredit'));
@@ -247,7 +250,7 @@
     }
     function goHome(){
       if(state.studentMode){
-        state.session=null;state.participantId='';state.participantName='';$('joinCode').value='';$('codeCard').classList.remove('hidden');
+        state.session=null;state.participantId='';state.participantName='';$('joinCode').value='';$('loadingCard').classList.add('hidden');$('codeCard').classList.remove('hidden');
         $('identityCard').classList.add('hidden');$('answerCard').classList.add('hidden');$('successCard').classList.add('hidden');show('join');
       }else show('home');
     }
@@ -263,7 +266,7 @@
     function joinSession(event){
       event.preventDefault();const code=$('joinCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
       $('joinError').classList.add('hidden');busy($('joinBtn'),true,t('searching'));
-      runner(session=>{busy($('joinBtn'),false);setSession(session);prepareIdentity()},error=>{busy($('joinBtn'),false);$('joinError').textContent=errorText(error);$('joinError').classList.remove('hidden')})
+      runner(session=>{busy($('joinBtn'),false);setSession(session);prepareIdentity()},error=>{busy($('joinBtn'),false);$('loadingCard').classList.add('hidden');$('codeCard').classList.remove('hidden');$('joinError').textContent=errorText(error);$('joinError').classList.remove('hidden')})
         .obtenerSesion(code);
     }
     function identityKey(){return 'nubia-participant-'+(state.session?state.session.codigo:'')}
@@ -273,7 +276,7 @@
     }
     function prepareIdentity(){
       state.participantId='';state.participantName='';$('studentName').value='';
-      $('codeCard').classList.add('hidden');$('answerCard').classList.add('hidden');$('successCard').classList.add('hidden');$('identityCard').classList.remove('hidden');
+      $('loadingCard').classList.add('hidden');$('codeCard').classList.add('hidden');$('answerCard').classList.add('hidden');$('successCard').classList.add('hidden');$('identityCard').classList.remove('hidden');
       setTimeout(()=>$('studentName').focus(),50);
     }
     function comparableName(value){return String(value||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('es')}
@@ -430,7 +433,7 @@
       const code=INITIAL_CODE;
       if(state.studentMode){
         show('join');
-        if(code){$('joinCode').value=code.toUpperCase();joinSession(new Event('submit'))}
+        if(code){$('joinCode').value=code.toUpperCase();$('codeCard').classList.add('hidden');$('loadingCard').classList.remove('hidden');joinSession(new Event('submit'))}
         else setTimeout(()=>$('joinCode').focus(),50);
       }
     })();
